@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang='en'>
+		
+	<head>
+		<meta charset='utf-8'>
+		<title><%=youtube.title%></title>
+		
+		<meta name="description" content="<%=youtube.description%>"/>
+		<meta itemprop="name" content="<%=youtube.title%>">
+		<meta itemprop="description" content="<%=youtube.description%>">
+		<meta itemprop="image" content="<%=youtube.thumbnails.high.url%>">
+		
+		<meta property="og:title" content="<%=youtube.title%>"/>
+		<meta property="og:description" content="<%=youtube.description%>"/>
+		<meta property="og:image" content="<%=youtube.thumbnails.high.url%>"/> 
+		<meta property="og:site_name" content="jaydoes.video/share/<%=youtube.id%>"/>
+		<meta property="og:url" content="http://jaydoes.video.com/share/<%=youtube.id%>" />
+		<meta property='og:video' content='http://jaydoes.video/share/<%=youtube.id%>'/>
+		<meta property="fb:app_id" content="303472459794735" />
+		<meta property='og:type' content='video.movie'/>
+		<meta property='og:video:height' content='349'/>
+		<meta property='og:video:type' content='application/x-shockwave-flash'/>
+		<meta property='og:video:width' content='560'/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<link href="/assets/stylesheets/share/bootstrap.min.css" rel="stylesheet">
+		<link href="/assets/stylesheets/share/bootstrap-theme.min.css" rel="stylesheet">
+		
+		<style>
+			body{
+				margin: 0;
+			}
+			.stats-and-controls{
+				font-size: 1.2em;
+			}
+			.stats-table{
+				width: 100%;
+			}
+			.thumbs_up, .thumbs_down{
+				width: 12px;
+				display: inline-block;
+				height:12px;
+				margin: 0px 10px;
+			}
+			.views {
+				width: 60%;
+				text-align: left;
+			}
+			.likes {
+				width: 20%;
+				text-align: right;
+			}
+			.share {
+				width: 20%;
+				text-align: right;
+			}
+			.fb-share-button-container{
+				text-align: center;
+				
+			}
+			.btn-facebook {
+				background: #3B5998;
+				border-radius: 0;
+				color: #fff;
+				border-width: 1px;
+				border-style: solid;
+				border-color: #263961; 
+			}
+			.btn-facebook:link, .btn-facebook:visited {
+				color: #fff;
+			}
+			.btn-facebook:active, .btn-facebook:hover {
+				background: #263961;
+				color: #fff;
+			}
+			.fb-share-button-container{
+				margin-bottom: 20px;
+			}
+			.text-left{
+				text-align: left;
+			}
+			.text-right{
+				text-align: right;
+			}
+		</style>
+		
+	</head>
+				
+	<body>
+		<div id="player"></div>
+		<div class="container">
+			<div class="row stats-and-controls">
+				<div class="col-xs-6 text-left">
+					<%=youtube.statistics.viewCount%> views
+				</div>
+				<div class="col-xs-6 text-right">
+					<i class="thumbs_up fa fa-thumbs-up"/></i><%=youtube.statistics.likeCount%>
+					<i class="thumbs_up fa fa-thumbs-down"/></i><%=youtube.statistics.dislikeCount%>
+				</div>
+			</div>
+			<div class="row text-center">
+				<div class="col-xs-2"></div>
+				<div class="col-xs-8">
+						<a id="muteButton" class="btn btn-default btn-lg btn-block"><i class="fa fa-volume-off"></i></a>
+				</div>
+				<div class="col-xs-2"></div>
+			</div>
+			<div class="row title">
+				<div class="col-xs-12">
+					<h1><%=youtube.title%></h1>
+					<p><%=youtube.description%></p>
+				</div>
+			</div>
+			<div id="fb-share-button-container" class="row fb-share-button-container">
+				<div class="col-xs-12">
+					<a href="<%=shareUrl%>" title="Facebook" class="btn btn-facebook btn-lg"><i class="fa fa-facebook-f"></i> Share on Facebook</a>
+				</div>
+			</div>
+			<div class="row channel-container">
+
+			</div>
+		</div>
+		
+		<script>
+			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+			//if (navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/FBAV/i)) {
+			if(isMobile){
+				document.getElementById('fb-share-button-container').style.display = 'none';
+			}
+			
+			var tag = document.createElement('script');
+			tag.src = "https://www.youtube.com/iframe_api";
+			var firstScriptTag = document.getElementsByTagName('script')[0];
+			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			
+			var player;
+			//var muteButton = document.getElementById('mute-button');
+
+			function onYouTubeIframeAPIReady() {
+				player = new YT.Player('player', {
+				height: (window.innerWidth * 9) / 16,
+				width: window.innerWidth,
+				videoId: "<%=youtube.id%>",
+				playerVars: {
+					controls: 1,
+					loop: 1,
+					showinfo: 0
+				},
+				events: {
+					'onReady': onPlayerReady,
+					'onStateChange': onPlayerStateChange
+				}
+				});
+				window.player = player;
+			}
+			function isFullscreen(){
+				return (document.fullscreenElement && document.fullscreenElement !== null) ||
+					(document.webkitFullscreenElement && document.webkitFullscreenElement !== null) ||
+					(document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+					(document.msFullscreenElement && document.msFullscreenElement !== null)
+				;
+			}
+			function playFullscreen (){
+				var iframe = player.getIframe();
+				var requestFullScreen = iframe.requestFullScreen || iframe.mozRequestFullScreen || iframe.webkitRequestFullScreen;
+				if (requestFullScreen && iframe) {
+					requestFullScreen.bind(iframe)();
+				}
+			}
+
+			function closeFullscreen (){
+				if (document.exitFullscreen) {
+					document.exitFullscreen();
+				} else if (document.webkitExitFullscreen) {
+					document.webkitExitFullscreen();
+				} else if (document.mozCancelFullScreen) {
+					document.mozCancelFullScreen();
+				} else if (document.msExitFullscreen) {
+					document.msExitFullscreen();
+				}
+			}
+			
+			function onOrientationChange(value){
+				if(window.screen && window.screen.orientation && typeof window.screen.orientation.angle != "undefined"){
+					if(window.screen.orientation.angle == 90){
+						playFullscreen();
+					} else {
+						closeFullscreen();
+					}
+				}
+			}
+
+			function onResize(){
+				player.setSize(window.innerWidth, (window.innerWidth * 9) / 16);
+				
+			}
+
+			function onMuteButtonClick(evt){
+				let button = evt.currentTarget;
+				console.log('button',button);
+				window.btn = button;
+				if(player.isMuted()){
+					button.html = "<i class='fa fa-volume-up'></i>";
+					button.className = "btn btn-danger btn-lg btn-block";
+					player.unMute();
+				} else {
+					button.html = "<i class='fa fa-volume-off'></i>";
+					button.className = "btn btn-default btn-lg btn-block";
+					player.mute();
+				}
+			}
+
+			function onPlayerReady(event) {
+				//Add Event Listeners
+				muteButton.addEventListener('click', onMuteButtonClick);
+				window.addEventListener('orientationchange', onOrientationChange);
+				window.addEventListener('resize', onResize);
+				player.setPlaybackQuality('hd720');
+				player.mute();
+				//event.target.playVideo();
+				player.playVideo();
+			}
+			
+			function onPlayerStateChange(evt){
+				//-1 – unstarted
+				//0 – ended
+				//1 – playing
+				//2 – paused
+				//3 – buffering
+				//5 – video cued
+				console.log('evt.data', evt.data);
+			}
+			
+		</script>
+	</body>
+	
+</html>
+
+			
